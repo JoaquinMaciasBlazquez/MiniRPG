@@ -20,10 +20,17 @@ public class PlayerController : MonoBehaviour {
     private bool isMoving;
     // Referencia a la cámara.
     private Camera mainCamera;
+    // Variable que contrendrá el número de monedas actuales.
+    private int currentCoins;
 
     private void Awake() {
 
         CheckReferences();
+    }
+
+    private void Start() {
+
+        currentCoins = 0;
     }
 
     private void Update() {
@@ -34,6 +41,26 @@ public class PlayerController : MonoBehaviour {
         }
 
         CheckMovement();
+        UpdateAnimator();
+    }
+
+    private void OnTriggerEnter(Collider other) {
+
+        // Si el collider que hemos recuperado que es trigger tiene la interfaz IPickeable...
+        if (other.TryGetComponent(out IPickeable pickeable)) {
+            // Ejecutamos la lógica de pick up
+            pickeable.PickUp();
+        }
+    }
+
+    private void OnEnable() {
+        // Nos suscribimos al evento que lanza la moneda
+        Coin.OnCoinCollected += CollectCoin;   
+    }
+
+    private void OnDisable() {
+        // Nos desuscribimos al evento que lanza la moneda
+        Coin.OnCoinCollected -= CollectCoin;   
     }
 
     /// <summary>
@@ -90,6 +117,13 @@ public class PlayerController : MonoBehaviour {
         // Calculamos la distancia a la que se encuentra la posición final de la actual
         float distance = Vector3.Distance(transform.position, targetPosition);
 
+        // De manera local creamos un vector3 que guardará la dirección y será el siguiente forward del personaje
+        Vector3 nextForward = direction;
+        // Anulamos el valor que tiene el forward en la Y para que el jugador no se oriente al suelo
+        nextForward.y = 0f;
+        // Le asignamos el forward nuevo
+        transform.forward = nextForward;
+
         // En el caso de que la distancia que nos separa al destino sea menor que 0.1, daremos
         // por hecho que hemos llegado...
         if (distance <= 0.1f) {
@@ -105,5 +139,22 @@ public class PlayerController : MonoBehaviour {
         // Añadimos el Time.deltaTime (tiempo en segundos entre frames) para ajustar el movimiento
         // a todos los dispotivos tengan o no los mismos fps
         characterController.Move(direction * speed * Time.deltaTime);
+    }
+
+    /// <summary>
+    /// Método que irá dándole los valores necesarios al animator para su correcto funcionamiento
+    /// </summary>
+    private void UpdateAnimator() {
+
+        // Actualizamos el valor de "isMoving" del animator para que ejecute las animaciones pertinentes
+        animator.SetBool(Constants.ANIM_PLAYER_IS_MOVING, isMoving);
+    }
+
+    /// <summary>
+    /// Se ejecturá al recibir el evento de moneda recogida
+    /// </summary>
+    private void CollectCoin() {
+        currentCoins++;
+        Debug.Log($"El jugador ha cogido tremenda moneda, ahora tiene: {currentCoins}");
     }
 }
