@@ -1,27 +1,46 @@
+using System.Collections;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour {
 
     [Header("References")]
     // Referencia al animator
     [SerializeField] private Animator animator;
-    // Referencia al character controller
-    [SerializeField] private CharacterController characterController;
+    // Referencia al nav mesh agent
+    [SerializeField] private NavMeshAgent navMesh;
 
     [Header("Configuration")]
-    // Velocidad a la que se desplazará el jugador.
+    // Velocidad a la que se desplazarï¿½ el jugador.
     [SerializeField] private float speed;
-    // Layer que tendrá asignado el suelo para diferenciarlo.
+    // AceleraciÃ³n que tendrÃ¡ el personaje
+    [SerializeField] private float acceleration;
+    // Velocidad de giro que tendrÃ¡ el personaje
+    [SerializeField] private float angularSpeed;
+    // Velocidad de rotaciÃ³n propia
+    [SerializeField] private float rotationSpeed;
+    // Distancia a la que se pararÃ¡ el nav mesh
+    [SerializeField] private float stoppingDistance;
+    // Layer que tendrï¿½ asignado el suelo para diferenciarlo.
     [SerializeField] private LayerMask groundLayer;
+    // Cadencia de disparo
+    [SerializeField] private float shootCadency;
+    [SerializeField] private Transform shootPoint;
+    [SerializeField] private GameObject bulletPrefab;
 
-    // Dirección a la que se tiene que desplazar el jugador.
+    // Direcciï¿½n a la que se tiene que desplazar el jugador.
     private Vector3 targetPosition;
-    // Si true, indicará que está ya en movimiento.
+    // Si true, indicarï¿½ que estï¿½ ya en movimiento.
     private bool isMoving;
-    // Referencia a la cámara.
+    // Referencia a la cï¿½mara.
     private Camera mainCamera;
-    // Variable que contrendrá el número de monedas actuales.
+    // Variable que contrendrï¿½ el nï¿½mero de monedas actuales.
     private int currentCoins;
+    // Si true, podrÃ¡ disparar
+    private bool canShoot;
+    // Corrutina de disparo
+    private Coroutine shootCoroutine;
 
     private void Awake() {
 
@@ -31,15 +50,18 @@ public class PlayerController : MonoBehaviour {
     private void Start() {
 
         currentCoins = 0;
+        canShoot = true;
+        InitializeAgent();
     }
 
     private void Update() {
 
-        // Si se está moviendo...
+        // Si se estï¿½ moviendo...
         if (isMoving) {
             MoveToTarget();
         }
-
+    
+        Inputs();
         CheckMovement();
         UpdateAnimator();
     }
@@ -48,7 +70,7 @@ public class PlayerController : MonoBehaviour {
 
         // Si el collider que hemos recuperado que es trigger tiene la interfaz IPickeable...
         if (other.TryGetComponent(out IPickeable pickeable)) {
-            // Ejecutamos la lógica de pick up
+            // Ejecutamos la lï¿½gica de pick up
             pickeable.PickUp();
         }
     }
@@ -63,35 +85,44 @@ public class PlayerController : MonoBehaviour {
         Coin.OnCoinCollected -= CollectCoin;   
     }
 
+    private void Inputs() {
+
+        // Si se presiona la tecla E...
+        if (Input.GetKeyDown(KeyCode.E)) {
+            // Intentamos disparar
+            TryShoot();
+        }
+    }
+
     /// <summary>
-    /// Comprueba las referencias que sean necesarias para la ejecución del script.
+    /// Comprueba las referencias que sean necesarias para la ejecuciï¿½n del script.
     /// </summary>
     private void CheckReferences() {
 
-        // En el caso de que el animator sea nulo; es decir, no esté asignado...
+        // En el caso de que el animator sea nulo; es decir, no estï¿½ asignado...
         if (animator == null) {
             // Buscamos el componente animator en los hijos.
             animator = GetComponentInChildren<Animator>();
         }
 
-        // En el caso de que el character controller sea nulo; es decir, no esté asignado...
-        if (characterController == null) {
-            // Buscamos el componente character controller en los componentens del mismo objeto.
-            characterController = GetComponent<CharacterController>();
+        // En el caso de que el nav mesh sea nulo; es decir, no estï¿½ asignado...
+        if (navMesh == null) {
+            // Buscamos el componente nav mesh agent en los componentens del mismo objeto.
+            navMesh = GetComponent<NavMeshAgent>();
         }
 
         mainCamera = Camera.main;
     }
 
     /// <summary>
-    /// Método que lanzará la lógica de movimiento cuando sea necesario.
+    /// Mï¿½todo que lanzarï¿½ la lï¿½gica de movimiento cuando sea necesario.
     /// </summary>
     private void CheckMovement() {
 
         // Detectamos si el jugador hace click...
         if (Input.GetMouseButtonDown(0)) {
 
-            // Nos creamos un rayo desde la posición en la que se encuentra el ratón en base a la cámara.
+            // Nos creamos un rayo desde la posiciï¿½n en la que se encuentra el ratï¿½n en base a la cï¿½mara.
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
             // Lanzamos el rayo que hemos creado antes con una longitud infinita,
@@ -101,6 +132,8 @@ public class PlayerController : MonoBehaviour {
 
                 // Guardamos el punto al que tenemos que ir en base al punto en el que colisiona el raycast.
                 targetPosition = hit.point;
+                // Actualizamos el destino del nav mesh
+                navMesh.SetDestination(targetPosition);
                 // Decimos que se inicie el movimiento
                 isMoving = true;
             }
@@ -108,41 +141,51 @@ public class PlayerController : MonoBehaviour {
     }
 
     /// <summary>
-    /// Método que hará que el jugador se mueva hacia la posición deseada.
+    /// Mï¿½todo que harï¿½ que el jugador se mueva hacia la posiciï¿½n deseada.
     /// </summary>
     private void MoveToTarget() {
 
-        // Calculamos el vector dirección para que me diga hacia dónde se tiene que mover
-        Vector3 direction = (targetPosition - transform.position).normalized;
-        // Calculamos la distancia a la que se encuentra la posición final de la actual
-        float distance = Vector3.Distance(transform.position, targetPosition);
-
-        // De manera local creamos un vector3 que guardará la dirección y será el siguiente forward del personaje
-        Vector3 nextForward = direction;
-        // Anulamos el valor que tiene el forward en la Y para que el jugador no se oriente al suelo
-        nextForward.y = 0f;
-        // Le asignamos el forward nuevo
-        transform.forward = nextForward;
-
-        // En el caso de que la distancia que nos separa al destino sea menor que 0.1, daremos
-        // por hecho que hemos llegado...
-        if (distance <= 0.1f) {
-
-            // Marcamos que dejamos de movernos.
+        // En el caso de que la distancia que le quede al nav mesh para llegar a su destino sea 
+        // menor o igual a la distancia de parada...
+        if (navMesh.remainingDistance <= navMesh.stoppingDistance)
+        {
+            // Deja de moverse
             isMoving = false;
-            // Salimos del método
+            // Salimos del mÃ©todo
             return;
-        }
+        }        
 
-        // Aplicamos el movimiento al character controller. 
-        // La cantidad de movimiento es siempre la dirección por la velocidad
-        // Añadimos el Time.deltaTime (tiempo en segundos entre frames) para ajustar el movimiento
-        // a todos los dispotivos tengan o no los mismos fps
-        characterController.Move(direction * speed * Time.deltaTime);
+        // Calculamos el vector direcciï¿½n para que me diga hacia dï¿½nde se tiene que mover
+        Vector3 direction = (navMesh.steeringTarget - transform.position).normalized;
+        // Anulamos el valor que tiene en la Y para evitar que el character mire al suelo
+        direction.y = 0f;
+        // Si la direcciÃ³n a la que tenemos que ir es diferente de cero, es decir, ya estamos mirando en la direcciÃ³n correcta...
+        if (direction != Vector3.zero)
+        {
+            // Calculamos la rotaciÃ³n que tiene que tener el objeto en base a la direcciÃ³n a la que tiene que ir
+            Quaternion targetRotation = Quaternion.LookRotation(direction);            
+            // Vamos girando de manera gradual el muÃ±eco para que de mejor sensaciÃ³n
+            // El Slerp es IGUAL que el Lerp pero para los Quaternions.
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
     }
 
     /// <summary>
-    /// Método que irá dándole los valores necesarios al animator para su correcto funcionamiento
+    /// MÃ©todo encargado de inicializar correctamente el nav mesh asignando todas sus variables
+    /// </summary>
+    private void InitializeAgent() {
+        // Actualizamos el valor de la velocidad del navmesh 
+        navMesh.speed = speed;
+        // Actualizamos el valor de la velocidad de giro del navmesh 
+        navMesh.angularSpeed = angularSpeed;
+        // Actualizamos el valor de la aceleraciÃ³n del navmesh 
+        navMesh.acceleration = acceleration;
+        // Actualizamos el valor de la distancia de parada del navmesh 
+        navMesh.stoppingDistance = stoppingDistance;
+    }
+
+    /// <summary>
+    /// Mï¿½todo que irï¿½ dï¿½ndole los valores necesarios al animator para su correcto funcionamiento
     /// </summary>
     private void UpdateAnimator() {
 
@@ -151,10 +194,46 @@ public class PlayerController : MonoBehaviour {
     }
 
     /// <summary>
-    /// Se ejecturá al recibir el evento de moneda recogida
+    /// Se ejecturï¿½ al recibir el evento de moneda recogida
     /// </summary>
     private void CollectCoin() {
         currentCoins++;
         Debug.Log($"El jugador ha cogido tremenda moneda, ahora tiene: {currentCoins}");
+    }
+
+    /// <summary>
+    /// MÃ©todo encargado de realizar el disparo siempre que sea posible
+    /// </summary>
+    private void TryShoot() {
+
+        // Si no puede disparar, salimos del mÃ©todo
+        if (!canShoot) return;
+
+        Debug.Log("Try shoot");
+        // Actualizamos el animator para que haga la animaciÃ³n de disparo
+        animator.SetTrigger(Constants.ANIM_PLAYER_SHOOT);
+        // Dejamos de poder disparar
+        canShoot = false;
+        // Generamos el proyectil en el sitio del shootPoint con su rotaciÃ³n
+        Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
+        // Si la corrutina ya se estÃ¡ ejecutando
+        if (shootCoroutine != null)
+        {
+            // La paramos
+            StopCoroutine(shootCoroutine);
+        }
+        // Volvemos a empezarla
+        shootCoroutine = StartCoroutine(ShootCoroutine());
+    }
+
+    /// <summary>
+    /// Corrutina de disparo
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ShootCoroutine() {
+        // Esperamos el tiempo que diga la cadencia de disparo
+        yield return new WaitForSeconds(shootCadency);
+        // Marcamos que se pueda volver a disparar
+        canShoot = true;
     }
 }

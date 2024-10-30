@@ -9,4 +9,5 @@ public static class Constants {
 
     // ====== PLAYER ANIMATOR ======
     public const string ANIM_PLAYER_IS_MOVING = "isMoving";
+    public const string ANIM_PLAYER_SHOOT = "Shoot";
 }

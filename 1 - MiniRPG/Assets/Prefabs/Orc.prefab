@@ -200,6 +200,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8892403073849316419}
   - component: {fileID: 7354016889148033514}
+  - component: {fileID: 4704983516584402540}
   - component: {fileID: 6100092465620366241}
   - component: {fileID: 1004455375512868228}
   m_Layer: 0
@@ -242,6 +243,21 @@ MonoBehaviour:
   speed: 80
   duration: 0.2
   objectToShake: {fileID: 6115242468566118708}
+--- !u!114 &4704983516584402540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5440173841830906706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa284a79d2c03b744a3333cc55b6dbd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shakeEffect: {fileID: 7354016889148033514}
+  maxHealth: 50
+  healthImage: {fileID: 5020021325603546055}
 --- !u!136 &6100092465620366241
 CapsuleCollider:
   m_ObjectHideFlags: 0
