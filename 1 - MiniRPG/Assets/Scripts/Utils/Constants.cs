@@ -10,4 +10,9 @@ public static class Constants {
     // ====== PLAYER ANIMATOR ======
     public const string ANIM_PLAYER_IS_MOVING = "isMoving";
     public const string ANIM_PLAYER_SHOOT = "Shoot";
+
+    // ===== ORC ANIMATOR =====
+    public const string ANIM_ORC_SPEED = "speed";
+    public const string ANIM_ORC_SEARCH = "search";
+    public const string ANIM_ORC_MOTION = "motion";
 }

@@ -6770,33 +6770,8 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 767527135444567870, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
         type: 3}
-      propertyPath: navMesh
-      value: 
-      objectReference: {fileID: 2900220104193501336}
-    - target: {fileID: 767527135444567870, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-        type: 3}
-      propertyPath: drawGizmos
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 767527135444567870, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-        type: 3}
-      propertyPath: fieldOfView
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 767527135444567870, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-        type: 3}
-      propertyPath: stopDistance
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 767527135444567870, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-        type: 3}
       propertyPath: waypoints.Array.size
       value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 767527135444567870, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-        type: 3}
-      propertyPath: targeteableLayer.m_Bits
-      value: 128
       objectReference: {fileID: 0}
     - target: {fileID: 767527135444567870, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
         type: 3}
@@ -6818,26 +6793,6 @@ PrefabInstance:
       propertyPath: waypoints.Array.data[3]
       value: 
       objectReference: {fileID: 125229675}
-    - target: {fileID: 767527135444567870, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-        type: 3}
-      propertyPath: waypoints.Array.data[4]
-      value: 
-      objectReference: {fileID: 125229675}
-    - target: {fileID: 767527135444567870, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-        type: 3}
-      propertyPath: waypoints.Array.data[5]
-      value: 
-      objectReference: {fileID: 125229675}
-    - target: {fileID: 1004455375512868228, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-        type: 3}
-      propertyPath: m_Speed
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1004455375512868228, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-        type: 3}
-      propertyPath: m_StoppingDistance
-      value: 0.1
-      objectReference: {fileID: 0}
     - target: {fileID: 5440173841830906706, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
         type: 3}
       propertyPath: m_Name
@@ -6898,12 +6853,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d0e2c8fe265bf94eb24b1dad3037a32, type: 3}
---- !u!195 &2900220104193501336 stripped
-NavMeshAgent:
-  m_CorrespondingSourceObject: {fileID: 1004455375512868228, guid: 0d0e2c8fe265bf94eb24b1dad3037a32,
-    type: 3}
-  m_PrefabInstance: {fileID: 2900220104193501333}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5009347316349056593
 PrefabInstance:
   m_ObjectHideFlags: 0

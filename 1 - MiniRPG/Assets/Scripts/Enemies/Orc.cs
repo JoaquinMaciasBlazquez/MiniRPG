@@ -8,11 +8,13 @@ public class Orc : MonoBehaviour
     {
         Patrol,
         Chase,
-        Attack
+        Attack,
+        Search
     }
 
     [Header("References")]
     [SerializeField] private NavMeshAgent navMesh;
+    [SerializeField] private Animator animator;   
 
     [Header("Configuration")]
     [SerializeField] private float fieldOfView;
@@ -26,10 +28,13 @@ public class Orc : MonoBehaviour
     [SerializeField] private float chaseSpeed; 
     [Header("Attack state fields")]
     [SerializeField] private float attackDistance;
+    [Header("Search state fields")]
+    [SerializeField] private float searchTime;
 
     private int currentWaypointIndex;
     private States currentState;
     private Transform target;
+    private float searchTimeCounter;
 
     private void OnDrawGizmos() 
     {
@@ -43,7 +48,7 @@ public class Orc : MonoBehaviour
 
     private void Awake() 
     {
-        currentState = States.Patrol;    
+        SetState(States.Patrol);    
     }
 
     private void Update() 
@@ -62,6 +67,10 @@ public class Orc : MonoBehaviour
             AttackUpdate();
             break;
 
+            case States.Search:
+            SearchUpdate();
+            break;
+
             default:
             Debug.LogWarning("No sé cómo he llegado aquí.");
             break;
@@ -74,18 +83,55 @@ public class Orc : MonoBehaviour
     /// <param name="nextState"></param>
     private void SetState(States nextState)
     {
-        switch (nextState)
+        // En base al estado actual, ejecutamos su lógica de salida
+        switch (currentState)
         {
             case States.Patrol:
-            navMesh.speed = patrolSpeed;
+            PatrolExit();
             break;
             case States.Chase:
-            navMesh.speed = chaseSpeed;
+            ChaseExit();
+            break;
+            case States.Attack:
+            AttackExit();
+            break;
+            case States.Search:
+            SearchExit();
             break;
             default:
             break;
         }
+        
+        // Actualizamos el estado actual cambiándolo por el que estado que vamos a cambiar
         currentState = nextState;
+        
+        // En base al estado al que hemos entrado, ejecutamos una entrada u otra
+        switch (currentState)
+        {
+            case States.Patrol:
+            PatrolEnter();
+            break;
+            case States.Chase:
+            ChaseEnter();
+            break;
+            case States.Attack:
+            AttackEnter();
+            break;
+            case States.Search:
+            SearchEnter();
+            break;
+            default:
+            break;
+        }
+    }
+
+    /// <summary>
+    /// Método que se ejecutará cuando se entre en el estado de patrulla
+    /// </summary>
+    private void PatrolEnter()
+    {
+        navMesh.speed = patrolSpeed;
+        animator.SetFloat(Constants.ANIM_ORC_SPEED, 0f);
     }
 
     /// <summary>
@@ -118,6 +164,14 @@ public class Orc : MonoBehaviour
     }
 
     /// <summary>
+    /// Método que ejecutará toda la lógica que queramos que se ejecute al salir del estado de patrulla
+    /// </summary>
+    private void PatrolExit()
+    {
+
+    }
+
+    /// <summary>
     /// Función que devuelve true si el jugador está detro del campo de visión del enemigo
     /// </summary>
     /// <returns></returns>
@@ -132,6 +186,15 @@ public class Orc : MonoBehaviour
     }
 
     /// <summary>
+    /// Método que se ejecutará cuando entremos en el estado de chase
+    /// </summary>
+    private void ChaseEnter()
+    {
+        navMesh.speed = chaseSpeed;
+        animator.SetFloat(Constants.ANIM_ORC_SPEED, 1f);
+    }
+
+    /// <summary>
     /// Lógica del update del estado de chase
     /// </summary>
     private void ChaseUpdate()
@@ -139,8 +202,10 @@ public class Orc : MonoBehaviour
         // Si deja de ver al jugador...
         if (!CanSeePlayer())
         {
-            // Volvemos al estado de patrulla
-            SetState(States.Patrol);
+            // Vamos al estado de búsqueda
+            SetState(States.Search);
+            // Salimos del método de forma defensiva para ahorrarnos referencias nulas
+            return;
         }
         // Si la distancia con el jugador es mejor que la de ataque...
         if (Vector3.Distance(transform.position, target.position) <= attackDistance)
@@ -153,10 +218,80 @@ public class Orc : MonoBehaviour
     }
 
     /// <summary>
+    /// Método que se ejecutará en la salida del estado de chase
+    /// </summary>
+    private void ChaseExit()
+    {
+
+    }
+
+    /// <summary>
+    /// Método que se ejecutará en la entrada del estado de ataque
+    /// </summary>
+    private void AttackEnter()
+    {
+
+    }
+
+    /// <summary>
     /// Lógica del update del estado de attack
     /// </summary>
     private void AttackUpdate()
     {
         Debug.Log("Attacking");
+    }
+
+    /// <summary>
+    /// Método que se ejecutará en la salida del estado de ataque
+    /// </summary>
+    private void AttackExit()
+    {
+
+    }
+
+    /// <summary>
+    /// Entrada del estado de búsqueda
+    /// </summary>
+    private void SearchEnter()
+    {
+        // Paramos el nav mesh
+        navMesh.isStopped = true;
+        // Asignamos al temporizador el tiempo que dura la búsqueda
+        searchTimeCounter = searchTime;
+        // Ejecutamos la animación de búsqueda
+        animator.SetTrigger(Constants.ANIM_ORC_SEARCH);
+    }
+
+    /// <summary>
+    /// Update del estado de búsqueda
+    /// </summary>
+    private void SearchUpdate() 
+    {
+        // En el caso de que vuelva a ver al jugador
+        if (CanSeePlayer())
+        {
+            // Pasamos al estado de chase
+            SetState(States.Chase);
+        }
+        // Vamos restando el time.deltaTime al counter para que sea una cuenta regresiva
+        searchTimeCounter -= Time.deltaTime;
+        // En el caso de que termine el tiempo de búsqueda...
+        if (searchTimeCounter <= 0f)
+        {
+            // Volvemos al estado de patrulla
+            SetState(States.Patrol);
+        }
+    }
+
+    /// <summary>
+    /// Salida del estado de búsqueda
+    /// </summary>
+    private void SearchExit()
+    {
+        // Volvemos a hacer que el nav mesh se pueda mover
+        navMesh.isStopped = false;
+        // Le decimos al orco que vuelva a su animación de movimiento:
+        // lo hacemos aquí directamente porque sabemos que de la búsqueda va a ir al movimiento
+        animator.SetTrigger(Constants.ANIM_ORC_MOTION);
     }
 }
