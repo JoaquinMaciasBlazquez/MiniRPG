@@ -132,6 +132,8 @@ public class PlayerController : MonoBehaviour {
 
                 // Guardamos el punto al que tenemos que ir en base al punto en el que colisiona el raycast.
                 targetPosition = hit.point;
+                // Volvemos a hacer que se mueva el navmesh
+                navMesh.isStopped = false;
                 // Actualizamos el destino del nav mesh
                 navMesh.SetDestination(targetPosition);
                 // Decimos que se inicie el movimiento
@@ -208,8 +210,10 @@ public class PlayerController : MonoBehaviour {
 
         // Si no puede disparar, salimos del método
         if (!canShoot) return;
-
-        Debug.Log("Try shoot");
+        // Paramos el navmesh
+        navMesh.isStopped = true;   
+        // Decimos que no se mueve
+        isMoving = false;     
         // Actualizamos el animator para que haga la animación de disparo
         animator.SetTrigger(Constants.ANIM_PLAYER_SHOOT);
         // Dejamos de poder disparar

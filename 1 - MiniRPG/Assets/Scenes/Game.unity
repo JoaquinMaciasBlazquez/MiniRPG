@@ -482,7 +482,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &183184905
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -949,7 +949,7 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  shootCadency: 0
+  shootCadency: 0.5
   shootPoint: {fileID: 1749798357}
   bulletPrefab: {fileID: 5697816471097161777, guid: 75e3ff60476479345bf8bcb2b7c71400,
     type: 3}
@@ -3023,7 +3023,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &766739055
 Transform:
   m_ObjectHideFlags: 0
@@ -6162,7 +6162,7 @@ Transform:
   m_GameObject: {fileID: 1749798356}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.236, y: 0, z: 0.052}
+  m_LocalPosition: {x: 0.254, y: 0, z: 0.261}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
