@@ -1,18 +1,18 @@
-using UnityEngine;
+ using UnityEngine;
 
 public class Billboard : MonoBehaviour {
 
-    // Referencia a la cámara
+    // Referencia a la cï¿½mara
     private Transform cam;
 
     private void Awake() {
-        // Asignamos la referencia de la cámara
+        // Asignamos la referencia de la cï¿½mara
         cam = Camera.main.transform.parent;
     }
-
-    private void Start() {
-        // Hacemos que el hud mire en dirección contraria al forward de la cámara
-        // Lo ponemos en el start porque la cámara NUNCA va a girar
+    
+    private void Update() {
+        // Hacemos que el hud mire en direcciï¿½n contraria al forward de la cï¿½mara
+        // Lo ponemos en el start porque la cï¿½mara NUNCA va a girar
         transform.forward = -cam.forward;
     }
 }

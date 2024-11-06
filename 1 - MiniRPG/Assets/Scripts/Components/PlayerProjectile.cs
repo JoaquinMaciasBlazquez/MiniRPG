@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Playables;
 
 public class PlayerProjectile : MonoBehaviour {
 
@@ -10,6 +11,28 @@ public class PlayerProjectile : MonoBehaviour {
     [SerializeField] private float lifeTime;
     // Layer que tendrá que ignorar el layer
     [SerializeField] private LayerMask ignoreLayer;
+    // Referencia al audioSource de la bala que irá ejecutando sus sonidos
+    [SerializeField] private AudioSource audioSource;
+    // Clip de sonido que ejecutará cuando la bala se dispare
+    [SerializeField] private AudioClip shootClip;
+    // Clip de sonido que se ejecutará cuando la bala impacte
+    [SerializeField] private AudioClip impactClip;
+    // Referencia al mesh renderer
+    [SerializeField] private MeshRenderer meshRenderer;
+    // Referencia al collider
+    [SerializeField] private Collider bulletCollider;
+
+    private void Awake() {
+        // En el caso de que no hayamos asignado el audioSource a mano, adquiriremos la referencia desde código
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
+        // Ejecutamos el sonido de disparo
+        PlayAudioSource(shootClip, false);
+        // En el caso de que no tengamos asignado el renderer, cogemos su referencia de manera directa
+        if (meshRenderer == null) meshRenderer = GetComponentInChildren<MeshRenderer>();
+        // En el caso de que no tengamos asignado el collider, cogemos su referencia de manera directa
+        if (bulletCollider == null) bulletCollider = GetComponent<Collider>();
+        ToggleProjectile(true);
+    }
 
     private void Start() {
         // Destruimos la bala en el tiempo que digamos en el lifeTime, en caso de que no colisione en todo ese tiempo
@@ -31,7 +54,31 @@ public class PlayerProjectile : MonoBehaviour {
             // Le hacemos daño al damageable
             damageable.TakeDamage(damage);
         }
+        // Ejecitamos el audio de impacto
+        PlayAudioSource(impactClip, false);
+        // Desactivamos sus componentes visuales y su colisión
+        ToggleProjectile(false);
         // En el momento que impacte destruimos la bala
-        Destroy(gameObject);
+        Destroy(gameObject, 0.25f);
+    }
+
+    private void PlayAudioSource(AudioClip clip, bool isLoop) {
+        // Asignamos el clip que se va a reproducir
+        audioSource.clip = clip;
+        // Nos aseguramos de que no esté en loop para que no se reproduzca siempre el clip
+        audioSource.loop = isLoop;
+        // Ejecutamos el clip
+        audioSource.Play();
+    }
+
+    /// <summary>
+    /// Activa o desactiva lo visual y su colisión
+    /// </summary>
+    /// <param name="enabled"></param>
+    private void ToggleProjectile(bool enabled) {
+        // Activamos o desactivamos el renderer en base a lo que digamos por parámetro
+        meshRenderer.enabled = enabled;
+        // Activamos o desactivamos el collider en base a lo que digamos por parámetro
+        bulletCollider.enabled = enabled;
     }
 }

@@ -1,5 +1,7 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -48,8 +50,8 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Start() {
-
-        currentCoins = 0;
+        // Le asignamos a las monedas el valor que tuviéramos guardado de monedas
+        currentCoins = DataManager.Instance.currentCoins;
         canShoot = true;
         InitializeAgent();
     }
@@ -201,13 +203,14 @@ public class PlayerController : MonoBehaviour {
     private void CollectCoin() {
         currentCoins++;
         Debug.Log($"El jugador ha cogido tremenda moneda, ahora tiene: {currentCoins}");
+        DataManager.Instance.currentCoins = currentCoins;
+        DataManager.Instance.SaveData();
     }
 
     /// <summary>
     /// Método encargado de realizar el disparo siempre que sea posible
     /// </summary>
     private void TryShoot() {
-
         // Si no puede disparar, salimos del método
         if (!canShoot) return;
         // Paramos el navmesh
@@ -218,16 +221,29 @@ public class PlayerController : MonoBehaviour {
         animator.SetTrigger(Constants.ANIM_PLAYER_SHOOT);
         // Dejamos de poder disparar
         canShoot = false;
-        // Generamos el proyectil en el sitio del shootPoint con su rotación
-        Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
-        // Si la corrutina ya se está ejecutando
-        if (shootCoroutine != null)
-        {
-            // La paramos
-            StopCoroutine(shootCoroutine);
+        // Creamos un rayo desde la posición del ratón
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        // Lanzamos el rayo desde la posición que hemos dicho antes hasta el infinito mirando si colisiona con el groundLayer y si lo hace...
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer)) {
+            // Calculamos la dirección del punto con el que ha colisionado
+            // Vector dirección: punto de impacto - posición de disparo
+            Vector3 mouseDirection = (hit.point - shootPoint.position).normalized;
+            // Quitamos la dirección en Y para que no salga en diagonal el proyectil (solo se mueva en X y Z)
+            mouseDirection.y = 0f;
+            // Generamos el proyectil en el sitio del shootPoint
+            GameObject projectile = Instantiate(bulletPrefab, shootPoint.position, Quaternion.identity);
+            // Ponemos el forward del proyectil en la dirección de la que está el ratón
+            projectile.transform.forward = mouseDirection;
+            // Giramos el personaje en la misma dirección para evitar que pueda disparar a su espalda
+            transform.forward = mouseDirection;
+            // Si la corrutina ya se está ejecutando
+            if (shootCoroutine != null) {
+                // La paramos
+                StopCoroutine(shootCoroutine);
+            }
+            // Volvemos a empezarla
+            shootCoroutine = StartCoroutine(ShootCoroutine());
         }
-        // Volvemos a empezarla
-        shootCoroutine = StartCoroutine(ShootCoroutine());
     }
 
     /// <summary>
