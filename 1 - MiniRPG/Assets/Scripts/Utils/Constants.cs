@@ -17,4 +17,6 @@ public static class Constants {
     public const string ANIM_ORC_MOTION = "motion";
     // ===== PLAYER PREFS KEYS =====
     public const string KEY_CURRENT_COINS = "currentCoins";
+    // ===== CHEST ANIMATOR =====
+    public const string ANIM_CHEST_OPEN = "open";
 }

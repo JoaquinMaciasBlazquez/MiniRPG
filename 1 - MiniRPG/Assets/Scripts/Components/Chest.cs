@@ -3,6 +3,9 @@ using UnityEngine;
 public class Chest : MonoBehaviour {
 
     [SerializeField] private GameObject prompt;
+    [SerializeField] private ItemGenerator generator;
+    [SerializeField] private Animator animator;
+    [SerializeField] private AudioSource audioSource;
 
     private bool playerInside;
     // Si true, ya estará abierto
@@ -19,6 +22,14 @@ public class Chest : MonoBehaviour {
             if (!isOpened && Input.GetKeyDown(KeyCode.Q)) {
                 // Abrimos el cofre
                 isOpened = true;
+                // Generamos los items
+                generator.GenerateItems();
+                // Quitamos el indicador de la tecla
+                prompt.SetActive(false);
+                // Ejecutamos la animación
+                animator.SetTrigger(Constants.ANIM_CHEST_OPEN);
+                // Reproducimos el sonido de apertura del cofre
+                audioSource.Play();
             }
         } 
     }

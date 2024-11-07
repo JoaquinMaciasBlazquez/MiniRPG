@@ -62,6 +62,11 @@ public class PlayerProjectile : MonoBehaviour {
         Destroy(gameObject, 0.25f);
     }
 
+    /// <summary>
+    /// Método que ejecuta el sonido dicho en el clip
+    /// </summary>
+    /// <param name="clip"></param>
+    /// <param name="isLoop"></param>
     private void PlayAudioSource(AudioClip clip, bool isLoop) {
         // Asignamos el clip que se va a reproducir
         audioSource.clip = clip;

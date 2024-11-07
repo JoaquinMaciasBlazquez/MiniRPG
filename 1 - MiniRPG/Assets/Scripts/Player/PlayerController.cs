@@ -236,14 +236,21 @@ public class PlayerController : MonoBehaviour {
             projectile.transform.forward = mouseDirection;
             // Giramos el personaje en la misma dirección para evitar que pueda disparar a su espalda
             transform.forward = mouseDirection;
-            // Si la corrutina ya se está ejecutando
-            if (shootCoroutine != null) {
-                // La paramos
-                StopCoroutine(shootCoroutine);
-            }
-            // Volvemos a empezarla
-            shootCoroutine = StartCoroutine(ShootCoroutine());
+        } else {
+            // En el caso de que el apuntado no esté colisionando con nada...
+            // Generamos el proyectil en el sitio del shootPoint
+            GameObject projectile = Instantiate(bulletPrefab, shootPoint.position, Quaternion.identity);
+            // Ponemos el forward del proyectil en la dirección del forward del personaje para 
+            // que dispare hacia adelante
+            projectile.transform.forward = transform.forward;
         }
+        // Si la corrutina ya se está ejecutando
+        if (shootCoroutine != null) {
+        // La paramos
+            StopCoroutine(shootCoroutine);
+        }
+        // Volvemos a empezarla
+        shootCoroutine = StartCoroutine(ShootCoroutine());
     }
 
     /// <summary>
