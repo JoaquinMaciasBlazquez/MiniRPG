@@ -7,8 +7,11 @@ public class MainMenu : MonoBehaviour {
     [SerializeField] private CanvasGroup howToPlayCanvasGroup;
 
     private void Start() {
+        Time.timeScale = 1f;
         ToggleCanvasGroup(mainMenuCanvasGroup, true);
         ToggleCanvasGroup(howToPlayCanvasGroup, false);
+        MusicManager.Instance.PlayMainMenu();
+        MusicManager.Instance.PitchRegular();
     }
 
     public void StartButton() {
@@ -17,7 +20,7 @@ public class MainMenu : MonoBehaviour {
     }
 
     /// <summary>
-    /// Método que se asignará al botón para ir al menú de cómo se juega
+    /// Mï¿½todo que se asignarï¿½ al botï¿½n para ir al menï¿½ de cï¿½mo se juega
     /// </summary>
     public void HowToPlayButton() {
         ToggleCanvasGroup(howToPlayCanvasGroup, true);
@@ -25,7 +28,7 @@ public class MainMenu : MonoBehaviour {
     }
 
     /// <summary>
-    /// Método que se asignará al botón para volver al menú principal
+    /// Mï¿½todo que se asignarï¿½ al botï¿½n para volver al menï¿½ principal
     /// </summary>
     public void ReturnMenuButton() {
         ToggleCanvasGroup(mainMenuCanvasGroup, true);
@@ -35,17 +38,17 @@ public class MainMenu : MonoBehaviour {
     public void ExitButton() {
 
 #if UNITY_EDITOR // Si el script se ejecuta en el editor de Unity
-        // Paramos la ejecución del editor de unity
+        // Paramos la ejecuciï¿½n del editor de unity
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
-#if UNITY_STANDALONE // Si el script se está ejecutando en la app (en la build)
-        // Cerramos la aplicación
+#if UNITY_STANDALONE // Si el script se estï¿½ ejecutando en la app (en la build)
+        // Cerramos la aplicaciï¿½n
         Application.Quit();
 #endif
     }
 
     /// <summary>
-    /// Muestra o esconde el canvas que pasemos por parámetro en base al segundo parámetro.
+    /// Muestra o esconde el canvas que pasemos por parï¿½metro en base al segundo parï¿½metro.
     /// </summary>
     /// <param name="canvas"></param>
     /// <param name="enable"></param>
@@ -53,9 +56,9 @@ public class MainMenu : MonoBehaviour {
 
         // Ponemos el alpha del canvas a uno si enable es verdadero o a 0 para que no se vea si es falso
         canvas.alpha = enable ? 1f : 0f;
-        // Bloquea los raycasts solo en caso de que esté activo
+        // Bloquea los raycasts solo en caso de que estï¿½ activo
         canvas.blocksRaycasts = enable;
-        // Es interactable solo en caso de que esté activo
+        // Es interactable solo en caso de que estï¿½ activo
         canvas.interactable = enable;
     }
 }

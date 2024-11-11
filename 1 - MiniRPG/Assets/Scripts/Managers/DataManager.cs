@@ -16,8 +16,6 @@ public class DataManager : MonoBehaviour {
         if (!instance) {
             // Convertimos esta clase como singleton
             instance = this;
-            // Hacemos que nunca se destruya en las cargas entre escenas
-            DontDestroyOnLoad(gameObject);
             // En cualquier otro caso; es decir, cuando ya tengamos un singleton...
         }else {
             // Destruimos este objeto

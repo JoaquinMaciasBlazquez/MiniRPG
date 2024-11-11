@@ -58,6 +58,9 @@ public class PlayerController : MonoBehaviour {
 
     private void Update() {
 
+        // Si el juego está en pausa, no haremos nada de lógica del jugador
+        if (GameManager.Instance.GamePaused) return;
+
         // Si se est� moviendo...
         if (isMoving) {
             MoveToTarget();
