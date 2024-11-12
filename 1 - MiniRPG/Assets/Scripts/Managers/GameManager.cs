@@ -24,6 +24,13 @@ public class GameManager : MonoBehaviour {
         }
     }
 
+    private bool hasKey;
+    public bool HasKey {
+        get {
+            return hasKey;
+        }
+    }
+
     private void Awake() {
         // Declaración de un singleton
         if (instance == null) {
@@ -40,6 +47,8 @@ public class GameManager : MonoBehaviour {
         Time.timeScale = 1f;
         // El canvas desactivado
         pauseCanvas.SetActive(false);
+        // Cargamos si tuviéramos o no la llave
+        hasKey = DataManager.Instance.hasKey;
         MusicManager.Instance.PlayGame();
         MusicManager.Instance.PitchRegular();
     }
@@ -66,5 +75,20 @@ public class GameManager : MonoBehaviour {
         Time.timeScale = gamePaused ? 0f : 1f;
         // Activamos el canvas o no según el valor que tenga game paused
         pauseCanvas.SetActive(gamePaused);
+    }
+
+    /// <summary>
+    /// Método que será llamado en el momento que recojamos la llave
+    /// </summary>
+    public void CollectKey () {
+        // En el caso de que no tenga ya la llave...
+        if (!hasKey) { 
+            // Hacemos que la tenga
+            hasKey = true;
+            // Guardamos en el data manager si tenemos o no llave
+            DataManager.Instance.hasKey = hasKey;
+            // Guardamos la info en disco
+            DataManager.Instance.SaveData();
+        }
     }
 }
